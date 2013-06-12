@@ -1,0 +1,13 @@
+//agt-login.ncsa.uiuc.edu
+//tg32-1.ncsa.uiuc.edu
+//tg32-0.ncsa.uiuc.edu
+//tg32-3.ncsa.uiuc.edu
+tg-login3.ncsa.teragrid.org
+tunc.ncsa.uiuc.edu
+//cee-zzvq.cee.uiuc.edu
+//cee-zztr.cee.uiuc.edu
+tund.ncsa.uiuc.edu
+cee-zzuk.cee.uiuc.edu
+dcllnx1.ews.uiuc.edu
+//tune.ncsa.uiuc.edu
+//dcllnx[1-10].ews.uiuc.edu

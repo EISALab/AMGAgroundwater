@@ -1,0 +1,108 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: mflowlib - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\smyan\LOCALS~1\Temp\RSP493.tmp" with contents
+[
+/check:bounds /compile_only /debug:full /define:"_DEBUG" /fpp /include:"Debug/" /nologo /warn:argument_checking /warn:nofileopt /module:"Debug/" /object:"Debug/" /pdbfile:"Debug/DF60.PDB" 
+"D:\Project Lib\gmslib\build\mflowlib\mf96.f"
+]
+Creating temporary file "C:\DOCUME~1\smyan\LOCALS~1\Temp\RSP494.tmp" with contents
+[
+/check:bounds /compile_only /debug:full /define:"_DEBUG" /include:"Debug/" /nologo /warn:argument_checking /warn:nofileopt /module:"Debug/" /object:"Debug/" /pdbfile:"Debug/DF60.PDB" 
+"D:\Project Lib\gmslib\build\mflowlib\wel5.f"
+"D:\Project Lib\gmslib\build\mflowlib\utl5.f"
+"D:\Project Lib\gmslib\build\mflowlib\tlk1.f"
+"D:\Project Lib\gmslib\build\mflowlib\str1.f"
+"D:\Project Lib\gmslib\build\mflowlib\sor5.f"
+"D:\Project Lib\gmslib\build\mflowlib\sip5.f"
+"D:\Project Lib\gmslib\build\mflowlib\riv5.f"
+"D:\Project Lib\gmslib\build\mflowlib\res1.f"
+"D:\Project Lib\gmslib\build\mflowlib\rch5.f"
+"D:\Project Lib\gmslib\build\mflowlib\pcg2.f"
+"D:\Project Lib\gmslib\build\mflowlib\modsub.f"
+"D:\Project Lib\gmslib\build\mflowlib\lkmt3.f"
+"D:\Project Lib\gmslib\build\mflowlib\ibs1.f"
+"D:\Project Lib\gmslib\build\mflowlib\hfb1.f"
+"D:\Project Lib\gmslib\build\mflowlib\ghb5.f"
+"D:\Project Lib\gmslib\build\mflowlib\gfd1.f"
+"D:\Project Lib\gmslib\build\mflowlib\fhb1.f"
+"D:\Project Lib\gmslib\build\mflowlib\evt5.f"
+"D:\Project Lib\gmslib\build\mflowlib\drn5.f"
+"D:\Project Lib\gmslib\build\mflowlib\de45.f"
+"D:\Project Lib\gmslib\build\mflowlib\chd1.f"
+"D:\Project Lib\gmslib\build\mflowlib\bcf5.f"
+"D:\Project Lib\gmslib\build\mflowlib\bas5.f"
+]
+Creating temporary file "C:\DOCUME~1\smyan\LOCALS~1\Temp\RSP495.tmp" with contents
+[
+/nologo /out:"../../lib/mflowd.lib" 
+".\Debug\bas5.obj"
+".\Debug\bcf5.obj"
+".\Debug\chd1.obj"
+".\Debug\de45.obj"
+".\Debug\drn5.obj"
+".\Debug\evt5.obj"
+".\Debug\fhb1.obj"
+".\Debug\gfd1.obj"
+".\Debug\ghb5.obj"
+".\Debug\hfb1.obj"
+".\Debug\ibs1.obj"
+".\Debug\lkmt3.obj"
+".\Debug\mf96.obj"
+".\Debug\modsub.obj"
+".\Debug\pcg2.obj"
+".\Debug\rch5.obj"
+".\Debug\res1.obj"
+".\Debug\riv5.obj"
+".\Debug\sip5.obj"
+".\Debug\sor5.obj"
+".\Debug\str1.obj"
+".\Debug\tlk1.obj"
+".\Debug\utl5.obj"
+".\Debug\wel5.obj"
+]
+Creating command line "link.exe -lib @C:\DOCUME~1\smyan\LOCALS~1\Temp\RSP495.tmp"
+<h3>Output Window</h3>
+Compiling Fortran...
+mf96.i
+D:\Project Lib\gmslib\build\mflowlib\mf96.f(2108) : Warning: A jump into a block from outside the block has occurred.   [600]
+      OPEN(UNIT=ISUP,FILE=FNAME,STATUS='OLD',ERR=600)
+-------------------------------------------------^
+Compiling Fortran...
+D:\Project Lib\gmslib\build\mflowlib\wel5.f
+D:\Project Lib\gmslib\build\mflowlib\utl5.f
+D:\Project Lib\gmslib\build\mflowlib\tlk1.f
+D:\Project Lib\gmslib\build\mflowlib\str1.f
+D:\Project Lib\gmslib\build\mflowlib\sor5.f
+D:\Project Lib\gmslib\build\mflowlib\sip5.f
+D:\Project Lib\gmslib\build\mflowlib\riv5.f
+D:\Project Lib\gmslib\build\mflowlib\res1.f
+D:\Project Lib\gmslib\build\mflowlib\rch5.f
+D:\Project Lib\gmslib\build\mflowlib\pcg2.f
+D:\Project Lib\gmslib\build\mflowlib\modsub.f
+D:\Project Lib\gmslib\build\mflowlib\lkmt3.f
+D:\Project Lib\gmslib\build\mflowlib\ibs1.f
+D:\Project Lib\gmslib\build\mflowlib\hfb1.f
+D:\Project Lib\gmslib\build\mflowlib\ghb5.f
+D:\Project Lib\gmslib\build\mflowlib\gfd1.f
+D:\Project Lib\gmslib\build\mflowlib\fhb1.f
+D:\Project Lib\gmslib\build\mflowlib\evt5.f
+D:\Project Lib\gmslib\build\mflowlib\drn5.f
+D:\Project Lib\gmslib\build\mflowlib\de45.f
+D:\Project Lib\gmslib\build\mflowlib\chd1.f
+D:\Project Lib\gmslib\build\mflowlib\bcf5.f
+D:\Project Lib\gmslib\build\mflowlib\bas5.f
+Creating library...
+
+
+
+<h3>Results</h3>
+mflowd.lib - 0 error(s), 1 warning(s)
+</pre>
+</body>
+</html>

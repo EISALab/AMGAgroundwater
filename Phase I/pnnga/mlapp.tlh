@@ -1,0 +1,157 @@
+// Created by Microsoft (R) C/C++ Compiler Version 12.00.8168.0 (cedcfbd1).
+//
+// mlapp.tlh
+//
+// C++ source equivalent of Win32 type library c:\matlabr12\bin\win32\mlapp.tlb
+// compiler-generated file created 10/01/03 at 17:46:46 - DO NOT EDIT!
+
+#pragma once
+#pragma pack(push, 8)
+
+#include <comdef.h>
+
+//
+// Forward references and typedefs
+//
+
+struct __declspec(uuid("669cec92-6e22-11cf-a4d6-00a024583c19"))
+/* interface */ IMLApp;
+struct __declspec(uuid("669cec93-6e22-11cf-a4d6-00a024583c19"))
+/* dispinterface */ DIMLApp;
+struct /* coclass */ MLApp;
+
+//
+// Smart pointer typedef declarations
+//
+
+_COM_SMARTPTR_TYPEDEF(IMLApp, __uuidof(IMLApp));
+_COM_SMARTPTR_TYPEDEF(DIMLApp, __uuidof(IDispatch));
+
+//
+// Type library items
+//
+
+struct __declspec(uuid("669cec92-6e22-11cf-a4d6-00a024583c19"))
+IMLApp : IUnknown
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetVisible,put=PutVisible))
+    long Visible;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    HRESULT GetFullMatrix (
+        _bstr_t Name,
+        _bstr_t Workspace,
+        SAFEARRAY * * pr,
+        SAFEARRAY * * pi );
+    HRESULT PutFullMatrix (
+        _bstr_t Name,
+        _bstr_t Workspace,
+        SAFEARRAY * pr,
+        SAFEARRAY * pi );
+    HRESULT MinimizeCommandWindow ( );
+    HRESULT MaximizeCommandWindow ( );
+    _bstr_t GetCharArray (
+        _bstr_t Name,
+        _bstr_t Workspace );
+    HRESULT PutCharArray (
+        _bstr_t Name,
+        _bstr_t Workspace,
+        _bstr_t charArray );
+    long GetVisible ( );
+    void PutVisible (
+        long pVal );
+
+    //
+    // Raw methods provided by interface
+    //
+
+    virtual HRESULT __stdcall raw_GetFullMatrix (
+        BSTR Name,
+        BSTR Workspace,
+        SAFEARRAY * * pr,
+        SAFEARRAY * * pi ) = 0;
+    virtual HRESULT __stdcall raw_PutFullMatrix (
+        BSTR Name,
+        BSTR Workspace,
+        SAFEARRAY * pr,
+        SAFEARRAY * pi ) = 0;
+    virtual BSTR __stdcall Execute (
+        BSTR Name ) = 0;
+    virtual HRESULT __stdcall raw_MinimizeCommandWindow ( ) = 0;
+    virtual HRESULT __stdcall raw_MaximizeCommandWindow ( ) = 0;
+    virtual void __stdcall Quit ( ) = 0;
+    virtual HRESULT __stdcall raw_GetCharArray (
+        BSTR Name,
+        BSTR Workspace,
+        BSTR * mlString ) = 0;
+    virtual HRESULT __stdcall raw_PutCharArray (
+        BSTR Name,
+        BSTR Workspace,
+        BSTR charArray ) = 0;
+    virtual HRESULT __stdcall get_Visible (
+        long * pVal ) = 0;
+    virtual HRESULT __stdcall put_Visible (
+        long pVal ) = 0;
+};
+
+struct __declspec(uuid("669cec93-6e22-11cf-a4d6-00a024583c19"))
+DIMLApp : IDispatch
+{
+    //
+    // Property data
+    //
+
+    __declspec(property(get=GetVisible,put=PutVisible))
+    long Visible;
+
+    //
+    // Wrapper methods for error-handling
+    //
+
+    // Methods:
+    HRESULT GetFullMatrix (
+        _bstr_t Name,
+        _bstr_t Workspace,
+        SAFEARRAY * * pr,
+        SAFEARRAY * * pi );
+    HRESULT PutFullMatrix (
+        _bstr_t Name,
+        _bstr_t Workspace,
+        SAFEARRAY * pr,
+        SAFEARRAY * pi );
+    _bstr_t Execute (
+        _bstr_t Name );
+    HRESULT MinimizeCommandWindow ( );
+    HRESULT MaximizeCommandWindow ( );
+    HRESULT Quit ( );
+    _bstr_t GetCharArray (
+        _bstr_t Name,
+        _bstr_t Workspace );
+    HRESULT PutCharArray (
+        _bstr_t Name,
+        _bstr_t Workspace,
+        _bstr_t charArray );
+    long GetVisible ( );
+    void PutVisible (
+        long _arg1 );
+};
+
+struct __declspec(uuid("554f6053-79d4-11d4-b067-009027ba5f81"))
+MLApp;
+    // [ default ] dispinterface DIMLApp
+    // interface IMLApp
+
+//
+// Wrapper method implementations
+//
+
+#include "mlapp.tli"
+
+#pragma pack(pop)

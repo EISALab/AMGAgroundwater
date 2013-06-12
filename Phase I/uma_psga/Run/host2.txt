@@ -1,0 +1,30 @@
+//windows hosts in room 4147
+rc1024
+rc2198
+cee-zzmi
+cee-zzsl
+cee-zzzr
+//windows hosts in room 4129
+cee-zzvr
+rc3175
+rc1075
+cee-zzvo
+cee-zzvq
+//windows hosts in room 4146
+cee-zzvp
+cee-zzvn
+//linux host in room 4219
+cee-zzuk.cee.uiuc.edu
+//hosts in ncsa trecc
+tg32-[0-4].ncsa.uiuc.edu
+tgc.trecc.org
+tgc0[4-9].trecc.org
+tgc1[0-2].trecc.org
+//hosts of agt
+agt-cn0[4-8].ncsa.uiuc.edu
+//agt-login.ncsa.uiuc.edu
+//ews hosts
+dcllnx[1-40].ews.uiuc.edu
+dclsn[1-30].ews.uiuc.edu
+//ehlnx[28-32].ews.uiuc.edu
+

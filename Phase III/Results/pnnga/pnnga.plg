@@ -1,0 +1,98 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: pnnga - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\smyan\LOCALS~1\Temp\RSPC0.tmp" with contents
+[
+/check:bounds /compile_only /dbglibs /debug:full /nologo /traceback /warn:argument_checking /warn:nofileopt /module:"Debug/" /object:"Debug/" /pdbfile:"Debug/DF60.PDB" 
+"D:\personal\smyan\Research\Third Phase -3\pnnga\sgafit.f90"
+"D:\personal\smyan\Research\Third Phase -3\pnnga\main.f90"
+]
+Creating temporary file "C:\DOCUME~1\smyan\LOCALS~1\Temp\RSPC1.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib rt3d.lib mflow.lib Ws2_32.lib /nologo /subsystem:console /incremental:no /pdb:"Debug/pnnga.pdb" /debug /machine:I386 /out:"Debug/pnnga.exe" /pdbtype:sept /force:MULTIPLE /DEFAULTLIB:LIBCMTD.LIB 
+".\Debug\case.obj"
+".\Debug\caseio.obj"
+".\Debug\casemeta.obj"
+".\Debug\chmcache.obj"
+".\Debug\chmcache_c.obj"
+".\Debug\clntkel.obj"
+".\Debug\condorio.obj"
+".\Debug\costfunc.obj"
+".\Debug\fmt_helper.obj"
+".\Debug\main.obj"
+".\Debug\mininnet.obj"
+".\Debug\ncpfit.obj"
+".\Debug\ncpfor.obj"
+".\Debug\ncpfor_c.obj"
+".\Debug\ncpjob.obj"
+".\Debug\netsock.obj"
+".\Debug\netstd.obj"
+".\Debug\Neuroio.obj"
+".\Debug\neuronet.obj"
+".\Debug\neuronet_c.obj"
+".\Debug\ofdump.obj"
+".\Debug\Params.obj"
+".\Debug\pdeio.obj"
+".\Debug\sampling.obj"
+".\Debug\scaling.obj"
+".\Debug\scaling_c.obj"
+".\Debug\sga.obj"
+".\Debug\sgafit.obj"
+".\Debug\stdfor.obj"
+".\Debug\stdfor_c.obj"
+".\Debug\StdHelper.obj"
+".\Debug\stdnorm.obj"
+".\Debug\uwkelobj.obj"
+".\Debug\uwstd.obj"
+".\Debug\statcomp.obj"
+]
+Creating command line "link.exe @C:\DOCUME~1\smyan\LOCALS~1\Temp\RSPC1.tmp"
+<h3>Output Window</h3>
+Compiling Fortran...
+D:\personal\smyan\Research\Third Phase -3\pnnga\sgafit.f90
+D:\personal\smyan\Research\Third Phase -3\pnnga\main.f90
+Linking...
+LINK : warning LNK4075: ignoring /EDITANDCONTINUE due to /INCREMENTAL:NO specification
+dfor.lib(matherr.obj) : warning LNK4006: __matherr already defined in LIBCMTD.LIB(matherr.obj); second definition ignored
+libcd.lib(winxfltr.obj) : warning LNK4006: __XcptFilter already defined in LIBCMTD.LIB(winxfltr.obj); second definition ignored
+libcd.lib(winxfltr.obj) : warning LNK4006: __XcptActTabCount already defined in LIBCMTD.LIB(winxfltr.obj); second definition ignored
+libcd.lib(winxfltr.obj) : warning LNK4006: __Num_FPE already defined in LIBCMTD.LIB(winxfltr.obj); second definition ignored
+libcd.lib(winxfltr.obj) : warning LNK4006: __First_FPE_Indx already defined in LIBCMTD.LIB(winxfltr.obj); second definition ignored
+libcd.lib(winxfltr.obj) : warning LNK4006: __XcptActTab already defined in LIBCMTD.LIB(winxfltr.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __cinit already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: _exit already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __exit already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __cexit already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __c_exit already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __C_Exit_Done already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __C_Termination_Done already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __exitflag already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __wpgmptr already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __pgmptr already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: ___winitenv already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __wenviron already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: ___initenv already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __environ already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: ___wargv already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: ___argv already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: ___argc already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __winminor already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __winmajor already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __winver already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __osver already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+libcd.lib(crt0dat.obj) : warning LNK4006: __umaskval already defined in LIBCMTD.LIB(crt0dat.obj); second definition ignored
+LINK : warning LNK4098: defaultlib "libcd.lib" conflicts with use of other libs; use /NODEFAULTLIB:library
+Debug/pnnga.exe : warning LNK4088: image being generated due to /FORCE option; image may not run
+
+
+
+<h3>Results</h3>
+pnnga.exe - 0 error(s), 31 warning(s)
+</pre>
+</body>
+</html>
