@@ -1,2 +1,0 @@
-//windows hosts in room 4147
-cee-zzqr.cee.uiuc.edu

@@ -1,4 +1,0 @@
-cd neutrain
-put train_set.dat valid_set.dat
-run matlabnn univnet [28,12,2] [-0.218744,-0.271352,1.2] train_set.dat model_set.dat mse.txt valid_set.dat
-get model_set.dat mse.txt

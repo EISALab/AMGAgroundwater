@@ -1,7 +1,0 @@
-01/18/06
-1. Added ProbCompareOneSampleT and ProbCompareTwoSampleT  using the two functions for comparision.
-2. Added ChooseRealizations2, using non-replacement Latin Hypertube sampling.
-3. Created critical realizations order
-4. Maximum realization sampling is 54
-5. Enabled extended sampling in BestSampling
-

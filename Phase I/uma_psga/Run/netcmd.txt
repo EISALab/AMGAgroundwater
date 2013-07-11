@@ -1,4 +1,0 @@
-cd neutrain
-put train.dat valid.dat
-run matlabnn univnet [28,12,2] [-0.218744,-0.271352,1.2] train.dat net.dat mse.txt valid.dat
-get net.dat mse.txt
