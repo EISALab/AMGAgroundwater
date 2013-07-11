@@ -1,0 +1,158 @@
+function modular_nitr
+minaxp = [
+0   0.2	0   0	0	0   ;
+0.9 0.9	0.6	0.6	0.6	1.0 ];
+minaxp = minaxp';
+minaxpn = bounds(6, -0.9, 0.9);
+minaxt = [0 15.0];
+minaxtn = [0.0 1.0];
+
+ntrains = 155;
+data = load('93odd.dat');
+
+%ntrains = 151;
+%data = load('93half.dat');
+
+p = data(:,1:6);
+t = data(:,7);
+p = p';
+p = normalize( p, minaxp, minaxpn );
+t = t';
+t = normalize( t, minaxt, minaxtn );
+
+vp = p(: , ntrains+1:size(p,2));
+vt = t(: , ntrains+1:size(p,2));
+pn = p(:, 1:ntrains);
+tn = t(:, 1:ntrains);
+
+net = create_modular_nn( 6, 2 );
+
+epoch = 1000;
+mse = [];
+for i=1:epoch
+    net = batch_train_modular_nn( net, pn, tn, 0.0001 );
+    tp1 = modular_sim( net, pn );
+    tp2 = modular_sim( net, vp );
+    mse = [mse; sum( (tp1-tn).^2 )/size(tn,2) sum( (tp2-vt).^2 )/size(vt,2)];
+end
+
+tp = modular_sim( net, vp );
+
+%normalized error
+err_norm = sum( (tp-vt).^2 )/size(vt,2) / var(vt');
+corr_norm = corrcoef( tp', vt' );
+
+%unnormalize the data.
+tp = unnormalize( tp, minaxt, minaxtn );
+vt = unnormalize( vt, minaxt, minaxtn );
+
+center = [-0.8168    0.1626   -0.6492   -0.6261   -0.6149   -0.1631]';
+center = center(:,1);
+%compute the distance of the points to the center
+%center = [-0.8703    0.1877   -0.7609   -0.7619   -0.7297    0.0657]';
+%center = [-0.6950    0.2831   -0.2613   -0.1752   -0.2144   -0.0539]';
+d = zeros(size(tp,2),1);
+for i=1:size(tp,2)
+    d(i,1) = distance( vp(:,i), center );
+end
+error = (tp-vt).^2;
+error = error';
+error = [d, error];
+y = sortrows( error, 1 );
+figure(1);
+plot( y(:,1), y(:,2), 'x' );
+
+%compute the RMSE.
+err = sum( (tp-vt).^2 )/size(vt,2);
+disp( 'error is:' );
+disp( [corr_norm(1,2) err_norm sqrt(err)] );
+
+y = [tp', vt'];
+
+figure(2);
+plot( y );
+
+figure(2);
+plot( vt', tp', 'x' );
+min(tp)
+hold on;
+plot( [0; 16], [0; 16], 'r' );
+plot( [10; 10], [0; 16], ':' );
+plot( [0; 16], [10; 10], ':' );
+axis( [0 16 0 16] );
+hold off;
+
+figure(3);
+plot( [ [1:epoch]' [1:epoch]' ], mse );
+
+[fp, fn, eall] = count_false( tp, vt );
+[fp fn eall]
+return;
+
+p = p';
+sils = zeros(7,1);
+for i=1:7
+    idx = kmeans(p, i+1, 'distance', 'city');
+    sil = silhouette(p, idx, 'city');
+    sils(i) = mean(sil);
+end
+
+plot(sils);
+
+sils
+
+function [mse]=testnn( net, p, t )
+tp = sim( net, p );
+%calculate the MSE
+sz = size( tp );
+mse = sum( (t-tp).^2, 1 );
+mse = sum( mse ) / sz(1) / sz(2);
+
+function [fp, fn, e] = count_false( p, o)
+n1 = 0;
+n2 = 0;
+n3 = 0;
+for i=1:size(p,2)
+    if( p(i)>10 && o(i)<10 )
+        n1 = n1+1;
+        n3 = n3 + 1;
+    elseif( p(i)<10 && o(i)>10 )
+        n2 = n2 +1;
+        n3 = n3 + 1;
+    end
+end
+fp = n1 / (n1+n2);
+fn = n2 / (n1+n2);
+e = 1 - n3 / size(p,2);
+
+function [z] = SimNet( net, x, minaxp, minaxpn, minaxt, minaxtn )
+pn = normalize( x, minaxp, minaxpn );
+tn = sim( net, pn );
+z = unnormalize( tn, minaxt, minaxtn );
+
+%p[n,m] is a matrix with m points, each point has n dimensions.
+%minaxp[n, 2] minaxp(:,1) the minimum of p(:), minaxp(:,2) the maximum of p(:)
+function [pn] = normalize( p, minaxp, minaxn )
+sz = size(minaxp);
+for i=1:sz(1)
+    pn(i, :) = ( p(i, :)-minaxp(i, 1) )/( minaxp(i, 2)-minaxp(i, 1) ) * ( minaxn(i, 2)-minaxn(i, 1) ) + minaxn(i, 1);
+end
+
+%p[n,m] is a matrix with m points, each point has n dimensions.
+%minaxp[n, 2] minaxp(:,1) the minimum of p(:), minaxp(:,2) the maximum of p(:)
+function [pn] = unnormalize( p, minaxp, minaxn )
+sz = size(minaxp);
+for i=1:sz(1)
+    pn(i, :) = ( p(i, :) -minaxn(i, 1) )/ ( minaxn(i, 2)-minaxn(i, 1) ) * ( minaxp(i, 2)-minaxp(i, 1) ) + minaxp(i, 1);
+end
+
+function [d] = distance( x, y )
+d = sqrt( sum( (x-y).^2 ) );
+
+%generate the [min max] matrix [n, 2]. n is the dimension. [:,1] is min
+%values, and [:,2] is max values
+function [z] = bounds( n, xmin, xmax )
+z = [xmin, xmax];
+for i=1:n-1
+    z = [z; [xmin, xmax] ];
+end

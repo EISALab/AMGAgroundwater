@@ -1,0 +1,5 @@
+//agt-cn0[1-8].ncsa.uiuc.edu
+//tgc0[1-4].trecc.org
+//tg-login4.ncsa.teragrid.org
+//ehlnx10.ews.uiuc.edu
+tg-login1.ncsa.teragrid.org

@@ -1,0 +1,798 @@
+C
+      SUBROUTINE GETHEADER(IUNIT,NPER,ISS,NODES,IBOUND,IUSTR,IMT3D)
+C ***************************************************************
+C GATHER FLOW MODEL INFORMATION THAT WILL BE SAVED AS THE HEADER
+C IN THE MODFLOW-MT3D LINK FILE.
+C ***************************************************************
+C last modified: 02-11-97
+C
+      DIMENSION IUNIT(24),IBOUND(NODES)
+C
+C--CHECK OPTIONS USED IN MODFLOW
+      MTWEL=IUNIT(2)
+      MTDRN=IUNIT(3)
+      MTRCH=IUNIT(8)
+      MTEVT=IUNIT(5)
+      MTRIV=MAX(IUNIT(4),IUSTR)
+      MTGHB=IUNIT(7)
+      MTISS=ISS
+      MTNPER=NPER
+      MTCHD=0
+      DO N=1,NODES
+        IF(IBOUND(N).LT.0) THEN
+          MTCHD=1
+          GOTO 100
+        ENDIF
+      ENDDO
+  100 CONTINUE
+C
+C--WRITE A HEADER TO MODFLOW-MT3D LINK FILE
+      WRITE(IMT3D) 'MT3D2.00.96',
+     &  MTWEL,MTDRN,MTRCH,MTEVT,MTRIV,MTGHB,MTCHD,MTISS,MTNPER
+C
+      RETURN
+      END
+C
+C
+      SUBROUTINE BAS1MT(HNEW,IBOUND,BOT,TOP,
+     &  NCOL,NROW,NLAY,KSTP,KPER,BUFF,IOUT)
+C ***************************************************************
+C CALCULATE AND SAVE SATURATED THICKNESS FOR USE IN MT3D.
+C INACTIVE CELLS (IBOUND=0) ARE IDENTIFIED WITH 1.E30.
+C CELLS IN CONFINED LAYERS ARE IDENTIFIED WITH -111.
+C ***************************************************************
+C Modified from McDonald & Harbaugh (1988)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DOUBLE PRECISION HNEW
+      DIMENSION HNEW(NCOL,NROW,NLAY), IBOUND(NCOL,NROW,NLAY),
+     &   BUFF(NCOL,NROW,NLAY), BOT(NCOL,NROW,NLAY),
+     &   TOP(NCOL,NROW,NLAY)
+      COMMON /FLWCOM/LAYCON(80)
+      TEXT='THKSAT'
+C
+C--INITIALIZE BUFF ARRAY WITH 1.E30 FOR INACTIVE CELLS
+C--OR FLAG -111 FOR ACTIVE CELLS
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCOL
+            IF(IBOUND(J,I,K).EQ.0) THEN
+              BUFF(J,I,K)=1.E30
+            ELSE
+              BUFF(J,I,K)=-111.
+            ENDIF
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--CALCULATE SATURATED THICKNESS FOR UNCONFINED/CONVERTIBLE
+C--LAYERS AND STORE IN ARRAY BUFF
+      KB=0
+      KT=0
+      DO K=1,NLAY
+        IF(LAYCON(K).EQ.1 .OR. LAYCON(K).EQ.3) KB=KB+1
+        IF(LAYCON(K).EQ.2 .OR. LAYCON(K).EQ.3) KT=KT+1
+        IF(LAYCON(K).EQ.0 .OR. LAYCON(K).EQ.2) GOTO 10
+C
+        DO I=1,NROW
+          DO J=1,NCOL
+            IF(IBOUND(J,I,K).NE.0) THEN
+              BUFF(J,I,K)=HNEW(J,I,K)-BOT(J,I,KB)
+              IF(LAYCON(K).EQ.3) THEN
+                THKLAY=TOP(J,I,KT)-BOT(J,I,KB)
+                BUFF(J,I,K)=MIN(BUFF(J,I,K),THKLAY)
+              ENDIF
+            ENDIF
+          ENDDO
+        ENDDO
+C
+   10 ENDDO
+C
+C--SAVE THE CONTENTS OF THE BUFFER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT
+      WRITE(IOUT) BUFF
+C
+C--RETURN
+      RETURN
+      END
+C
+C
+      SUBROUTINE BCF2MT(HNEW,IBOUND,CR,CC,CV,ISS,DELT,SC1,SC2,
+     & HOLD,TOP,NCOL,NROW,NLAY,KSTP,KPER,BUFF,IOUT)
+C ***************************************************************
+C SAVE FLOW ACROSS THREE CELL INTERFACES (QXX, QYY, QZZ),
+C FLOW RATE TO OR FROM GROUNDWATER STORAGE (QSTO),
+C AND LOCATIONS AND FLOW RATES OF CONSTANT-HEAD CELLS
+C FOR USE IN MT3D.
+C ***************************************************************
+C Modified from McDonald & Harbaugh (1988)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DOUBLE PRECISION HNEW
+      DIMENSION HNEW(NCOL,NROW,NLAY), IBOUND(NCOL,NROW,NLAY),
+     & CR(NCOL,NROW,NLAY), CC(NCOL,NROW,NLAY),
+     & CV(NCOL,NROW,NLAY), SC1(NCOL,NROW,NLAY), SC2(NCOL,NROW,NLAY),
+     & TOP(NCOL,NROW,NLAY),BUFF(NCOL,NROW,NLAY),HOLD(NCOL,NROW,NLAY)
+      COMMON /FLWCOM/LAYCON(80)
+C
+C--CALCULATE AND SAVE FLOW ACROSS RIGHT FACE
+      NCM1=NCOL-1
+      IF(NCM1.LT.1) GO TO 405
+      TEXT='QXX'
+C
+C--CLEAR THE BUFFER
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCOL
+            BUFF(J,I,K)=0.
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--FOR EACH CELL
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCM1
+            IF(IBOUND(J,I,K).NE.0.AND.IBOUND(J+1,I,K).NE.0) THEN
+              HDIFF=HNEW(J,I,K)-HNEW(J+1,I,K)
+              BUFF(J,I,K)=HDIFF*CR(J,I,K)
+            ENDIF
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--RECORD CONTENTS OF BUFFER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT
+      WRITE(IOUT) BUFF
+C
+  405 CONTINUE
+C
+C--CALCULATE AND SAVE FLOW ACROSS FRONT FACE
+      NRM1=NROW-1
+      IF(NRM1.LT.1) GO TO 505
+      TEXT='QYY'
+C
+C--CLEAR THE BUFFER
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCOL
+            BUFF(J,I,K)=0.
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--FOR EACH CELL
+      DO K=1,NLAY
+        DO I=1,NRM1
+          DO J=1,NCOL
+            IF(IBOUND(J,I,K).NE.0.AND.IBOUND(J,I+1,K).NE.0) THEN
+              HDIFF=HNEW(J,I,K)-HNEW(J,I+1,K)
+              BUFF(J,I,K)=HDIFF*CC(J,I,K)
+            ENDIF
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--RECORD CONTENTS OF BUFFER.
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT
+      WRITE(IOUT) BUFF
+C
+  505 CONTINUE
+C
+C--CALCULATE AND SAVE FLOW ACROSS FRONT FACE
+      NLM1=NLAY-1
+      IF(NLM1.LT.1) GO TO 700
+      TEXT='QZZ'
+C
+C--CLEAR THE BUFFER
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCOL
+            BUFF(J,I,K)=0.
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--FOR EACH CELL CALCULATE FLOW THRU LOWER FACE & STORE IN BUFFER
+      KT=0
+      DO K=1,NLM1
+        IF(LAYCON(K).EQ.3 .OR. LAYCON(K).EQ.2) KT=KT+1
+        DO I=1,NROW
+          DO J=1,NCOL
+C
+            IF(IBOUND(J,I,K).NE.0.AND.IBOUND(J,I,K+1).NE.0) THEN
+              HD=HNEW(J,I,K+1)
+              IF(LAYCON(K+1).EQ.3 .OR. LAYCON(K+1).EQ.2) THEN
+                TMP=HD
+                IF(TMP.LT.TOP(J,I,KT+1)) HD=TOP(J,I,KT+1)
+              ENDIF
+              HDIFF=HNEW(J,I,K)-HD
+              BUFF(J,I,K)=HDIFF*CV(J,I,K)
+            ENDIF
+C
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--RECORD CONTENTS OF BUFFER.
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT
+      WRITE(IOUT) BUFF
+C
+  700 CONTINUE
+C
+C--CALCULATE AND SAVE GROUNDWATER STORAGE IF TRANSIENT
+      IF(ISS.NE.0) GO TO 705
+      TEXT='STO'
+C
+C--CLEAR BUFFER
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCOL
+            BUFF(J,I,K)=0.
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--RUN THROUGH EVERY CELL IN THE GRID
+      KT=0
+      DO K=1,NLAY
+        LC=LAYCON(K)
+        IF(LC.EQ.3 .OR. LC.EQ.2) KT=KT+1
+        DO I=1,NROW
+          DO J=1,NCOL
+C
+C--CALCULATE FLOW FROM STORAGE (VARIABLE HEAD CELLS ONLY)
+            IF(IBOUND(J,I,K).GT.0) THEN
+              HSING=HNEW(J,I,K)
+              IF(LC.NE.3 .AND. LC.NE.2) THEN
+                SC=SC1(J,I,K)
+                STRG=SC*HOLD(J,I,K) - SC*HSING
+              ELSE
+                TP=TOP(J,I,KT)
+                SYA=SC2(J,I,KT)
+                SCFA=SC1(J,I,K)
+                SOLD=SYA
+                IF(HOLD(J,I,K).GT.TP) SOLD=SCFA
+                SNEW=SYA
+                IF(HSING.GT.TP) SNEW=SCFA
+                STRG=SOLD*(HOLD(J,I,K)-TP) + SNEW*TP - SNEW*HSING
+              ENDIF
+              BUFF(J,I,K)=STRG/DELT
+            ENDIF
+C
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--RECORD CONTENTS OF BUFFER.
+      CONTINUE
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT
+      WRITE(IOUT) BUFF
+C
+  705 CONTINUE
+C
+C--CALCULATE FLOW INTO OR OUT OF CONSTANT-HEAD CELLS
+      TEXT='CNH'
+      NCNH=0
+C
+C--CLEAR BUFFER
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCOL
+            BUFF(J,I,K)=0.
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--FOR EACH CELL IF IT IS CONSTANT HEAD COMPUTE FLOW ACROSS 6
+C--FACES.
+      KT=0
+      DO K=1,NLAY
+        LC=LAYCON(K)
+        IF(LC.EQ.3 .OR. LC.EQ.2) KT=KT+1
+        DO I=1,NROW
+          DO J=1,NCOL
+C
+C--IF CELL IS NOT CONSTANT HEAD SKIP IT & GO ON TO NEXT CELL.
+            IF (IBOUND(J,I,K).GE.0) GOTO 400
+            NCNH=NCNH+1
+C
+C--CLEAR FIELDS FOR SIX FLOW RATES.
+            X1=0.
+            X2=0.
+            X3=0.
+            X4=0.
+            X5=0.
+            X6=0.
+C
+C--CALCULATE FLOW THROUGH THE LEFT FACE
+C
+C--IF THERE IS AN INACTIVE CELL ON THE OTHER SIDE OF THIS
+C--FACE THEN GO ON TO THE NEXT FACE.
+            IF(J.EQ.1) GO TO 30
+            IF(IBOUND(J-1,I,K).EQ.0) GO TO 30
+            HDIFF=HNEW(J,I,K)-HNEW(J-1,I,K)
+C
+C--CALCULATE FLOW THROUGH THIS FACE INTO THE ADJACENT CELL.
+            X1=HDIFF*CR(J-1,I,K)
+C
+C--CALCULATE FLOW THROUGH THE RIGHT FACE
+   30       IF(J.EQ.NCOL) GO TO 60
+            IF(IBOUND(J+1,I,K).EQ.0) GO TO 60
+            HDIFF=HNEW(J,I,K)-HNEW(J+1,I,K)
+            X2=HDIFF*CR(J,I,K)
+C
+C--CALCULATE FLOW THROUGH THE BACK FACE.
+   60       IF(I.EQ.1) GO TO 90
+            IF (IBOUND(J,I-1,K).EQ.0) GO TO 90
+            HDIFF=HNEW(J,I,K)-HNEW(J,I-1,K)
+            X3=HDIFF*CC(J,I-1,K)
+C
+C--CALCULATE FLOW THROUGH THE FRONT FACE.
+   90       IF(I.EQ.NROW) GO TO 120
+            IF(IBOUND(J,I+1,K).EQ.0) GO TO 120
+            HDIFF=HNEW(J,I,K)-HNEW(J,I+1,K)
+            X4=HDIFF*CC(J,I,K)
+C
+C--CALCULATE FLOW THROUGH THE UPPER FACE
+  120       IF(K.EQ.1) GO TO 150
+            IF (IBOUND(J,I,K-1).EQ.0) GO TO 150
+            HD=HNEW(J,I,K)
+            IF(LC.NE.3 .AND. LC.NE.2) GO TO 122
+            TMP=HD
+            IF(TMP.LT.TOP(J,I,KT)) HD=TOP(J,I,KT)
+  122       HDIFF=HD-HNEW(J,I,K-1)
+            X5=HDIFF*CV(J,I,K-1)
+C
+C--CALCULATE FLOW THROUGH THE LOWER FACE.
+  150       IF(K.EQ.NLAY) GO TO 180
+            IF(IBOUND(J,I,K+1).EQ.0) GO TO 180
+            HD=HNEW(J,I,K+1)
+            IF(LAYCON(K+1).NE.3 .AND. LAYCON(K+1).NE.2) GO TO 152
+            TMP=HD
+            IF(TMP.LT.TOP(J,I,KT+1)) HD=TOP(J,I,KT+1)
+  152       HDIFF=HNEW(J,I,K)-HD
+            X6=HDIFF*CV(J,I,K)
+C
+C--SUM UP FLOWS THROUGH SIX SIDES OF CONSTANT HEAD CELL.
+  180       BUFF(J,I,K)=X1+X2+X3+X4+X5+X6
+C
+  400     ENDDO
+        ENDDO
+      ENDDO
+C
+C--RECORD CONTENTS OF BUFFER.
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NCNH
+C
+C--IF THERE ARE NO CONSTANT-HEAD CELLS THEN SKIP
+      IF(NCNH.LE.0) GOTO 1000
+C
+C--WRITE CONSTANT-HEAD CELL LOCATIONS AND RATES
+      DO K=1,NLAY
+        DO I=1,NROW
+          DO J=1,NCOL
+            IF(IBOUND(J,I,K).LT.0) WRITE(IOUT) K,I,J,BUFF(J,I,K)
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--RETURN
+ 1000 CONTINUE
+      RETURN
+      END
+C
+C
+      SUBROUTINE WEL1MT(NWELLS,MXWELL,WELL,IBOUND,
+     &  NCOL,NROW,NLAY,KSTP,KPER,IOUT)
+C *************************************************************
+C SAVE WELL LOCATIONS AND RATES FOR USE IN MT3D.
+C *************************************************************
+C Modified from McDonald & Harbaugh (1988)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DIMENSION WELL(4,MXWELL),IBOUND(NCOL,NROW,NLAY)
+      TEXT='WEL'
+C
+C--WRITE AN IDENTIFYING HEADER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NWELLS
+C
+C--IF THERE ARE NO WELLS RETURN
+      IF(NWELLS.LE.0) RETURN
+C
+C--WRITE WELL LOCATION AND RATE ONE AT A TIME
+      DO L=1,NWELLS
+        IL=WELL(1,L)
+        IR=WELL(2,L)
+        IC=WELL(3,L)
+C
+C--IF CELL IS EXTERNAL Q=0
+        Q=0.
+        IF(IBOUND(IC,IR,IL).GT.0) Q=WELL(4,L)
+        WRITE(IOUT) IL,IR,IC,Q
+      ENDDO
+C
+C--RETURN
+      RETURN
+      END
+C
+C
+      SUBROUTINE DRN1MT(NDRAIN,MXDRN,DRAI,HNEW,
+     &  NCOL,NROW,NLAY,IBOUND,KSTP,KPER,IOUT)
+C ************************************************************
+C CALCULATE AND SAVE DRAIN LOCATION AND RATES FOR USE IN MT3D.
+C *************************************************************
+C Modified from McDonald & Harbaugh (1988)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DOUBLE PRECISION HNEW
+      DIMENSION DRAI(5,MXDRN),
+     1           HNEW(NCOL,NROW,NLAY),IBOUND(NCOL,NROW,NLAY)
+      TEXT='DRN'
+C
+C--WRITE AN IDENTIFYING HEADER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NDRAIN
+C
+C--IF THERE ARE NO DRAINS THEN SKIP
+      IF(NDRAIN.LE.0) RETURN
+C
+C--FOR EACH DRAIN ACCUMULATE DRAIN FLOW
+      DO L=1,NDRAIN
+C
+C--GET LAYER, ROW & COLUMN OF CELL CONTAINING REACH.
+        IL=DRAI(1,L)
+        IR=DRAI(2,L)
+        IC=DRAI(3,L)
+        Q=0
+C
+C--CALCULATE Q FOR ACTIVE CELLS
+        IF(IBOUND(IC,IR,IL).GT.0) THEN
+C
+C--GET DRAIN PARAMETERS FROM DRAIN LIST.
+          EL=DRAI(4,L)
+          C=DRAI(5,L)
+          HHNEW=HNEW(IC,IR,IL)
+C
+C--IF HEAD LOWER THAN DRAIN THEN FORGET THIS CELL.
+C--OTHERWISE, CALCULATE Q=C*(EL-HHNEW).
+          IF(HHNEW.GT.EL) Q=C*(EL-HHNEW)
+C
+        ENDIF
+C
+C--WRITE DRAIN LOCATION AND RATE
+        WRITE(IOUT) IL,IR,IC,Q
+      ENDDO
+C
+C--RETURN
+      RETURN
+      END
+C
+C
+      SUBROUTINE RIV1MT(NRIVER,MXRIVR,RIVR,IBOUND,HNEW,
+     &  NCOL,NROW,NLAY,KSTP,KPER,IOUT)
+C ***************************************************************
+C SAVE RIVER LOCATIONS AND RATES FOR USE IN MT3D.
+C ***************************************************************
+C Modified from McDonald & Harbaugh (1988)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DOUBLE PRECISION HNEW
+      DIMENSION RIVR(6,MXRIVR),IBOUND(NCOL,NROW,NLAY),
+     &          HNEW(NCOL,NROW,NLAY)
+      TEXT='RIV'
+C
+C--WRITE AN IDENTIFYING HEADER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NRIVER
+C
+C--IF NO REACHES SKIP
+      IF(NRIVER.LE.0) RETURN
+C
+C--FOR EACH RIVER REACH ACCUMULATE RIVER FLOW
+      DO L=1,NRIVER
+C
+C--GET LAYER, ROW & COLUMN OF CELL CONTAINING REACH.
+        IL=RIVR(1,L)
+        IR=RIVR(2,L)
+        IC=RIVR(3,L)
+C
+C--IF CELL IS EXTERNAL RATE=0
+        IF(IBOUND(IC,IR,IL).LE.0) THEN
+          RATE=0.
+C
+C--GET RIVER PARAMETERS FROM RIVER LIST.
+        ELSE
+          HRIV=RIVR(4,L)
+          CRIV=RIVR(5,L)
+          RBOT=RIVR(6,L)
+          HHNEW=HNEW(IC,IR,IL)
+C
+C--COMPARE HEAD IN AQUIFER TO BOTTOM OF RIVERBED.
+C
+C--AQUIFER HEAD > BOTTOM THEN RATE=CRIV*(HRIV-HNEW).
+          IF(HHNEW.GT.RBOT) RATE=CRIV*(HRIV-HHNEW)
+C
+C--AQUIFER HEAD < BOTTOM THEN RATE=CRIV*(HRIV-RBOT)
+          IF(HHNEW.LE.RBOT) RATE=CRIV*(HRIV-RBOT)
+        ENDIF
+C
+C--WRITE RIVER REACH LOCATION AND RATE
+        WRITE(IOUT) IL,IR,IC,RATE
+C
+      ENDDO
+C
+C--RETURN
+      RETURN
+      END
+C
+C
+      SUBROUTINE RCH1MT(NRCHOP,IRCH,RECH,IBOUND,NROW,NCOL,NLAY,
+     &  KSTP,KPER,BUFF,IOUT)
+C *******************************************************************
+C SAVE REACHARGE LAYER INDICES (IF NLAY>1) AND RATES FOR USE IN MT3D.
+C *******************************************************************
+C Modified from McDonald & Harbaugh, 1988
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DIMENSION IRCH(NCOL,NROW),RECH(NCOL,NROW),
+     &  IBOUND(NCOL,NROW,NLAY),BUFF(NCOL,NROW,NLAY)
+      TEXT='RCH'
+C
+C--WRITE AN IDENTIFYING HEADER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT
+C
+C--CLEAR THE BUFFER.
+      DO IL=1,NLAY
+        DO IR=1,NROW
+          DO IC=1,NCOL
+            BUFF(IC,IR,IL)=0.
+          ENDDO
+        ENDDO
+      ENDDO
+C
+C--IF NRCHOP=1 RECH GOES INTO LAYER 1.
+      IF(NRCHOP.EQ.1) THEN
+C
+        IL=1
+        WRITE(IOUT) ((IL,J=1,NCOL),I=1,NROW)
+C
+C--STORE RECH RATE IN BUFF FOR ACTIVE CELLS
+        DO I=1,NROW
+          DO J=1,NCOL
+            IF(IBOUND(J,I,1).GT.0) BUFF(J,I,1)=RECH(J,I)
+          ENDDO
+        ENDDO
+        WRITE(IOUT) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
+C
+C--IF NRCHOP=2 RECH IS IN LAYER SHOWN IN INDICATOR ARRAY(IRCH).
+      ELSEIF(NRCHOP.EQ.2) THEN
+C
+        WRITE(IOUT) ((IRCH(J,I),J=1,NCOL),I=1,NROW)
+C
+C--STORE RECH RATE IN BUFF FOR ACTIVE CELLS
+        DO I=1,NROW
+          DO J=1,NCOL
+            IL=IRCH(J,I)
+            IF(IBOUND(J,I,IL).GT.0) BUFF(J,I,1)=RECH(J,I)
+          ENDDO
+        ENDDO
+        WRITE(IOUT) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
+C
+C--IF OPTION=3 RECHARGE IS INTO HIGHEST INTERNAL CELL.
+C--FIND HIGHEST INTERNAL CELL AND STORE IT IN BUFFER
+      ELSEIF(NRCHOP.EQ.3) THEN
+C
+        DO IR=1,NROW
+          DO IC=1,NCOL
+            DO IL=1,NLAY
+C
+C--IF CELL IS CONSTANT HEAD MOVE ON TO NEXT HORIZONTAL LOCATION.
+              IF(IBOUND(IC,IR,IL).LT.0) THEN
+                GOTO 20
+C
+C--IF CELL IS INACTIVE MOVE DOWN TO NEXT CELL.
+              ELSEIF (IBOUND(IC,IR,IL).EQ.0) THEN
+                GOTO 10
+C
+C--OTHERWISE, SAVE LAYER INDEX IN BUFF AND MOVE ON.
+              ELSE
+                BUFF(IC,IR,1)=IL
+                GOTO 20
+              ENDIF
+C
+   10       ENDDO
+   20     ENDDO
+        ENDDO
+        WRITE(IOUT) ((INT(BUFF(J,I,1)),J=1,NCOL),I=1,NROW)
+C
+C--STORE RECHARGE RATE IN BUFFER AND SAVE
+        DO I=1,NROW
+          DO J=1,NCOL
+            IF(BUFF(J,I,1).GT.0) BUFF(J,I,1)=RECH(J,I)
+          ENDDO
+        ENDDO
+        WRITE(IOUT) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
+C
+      ENDIF
+C
+C--RETURN
+      RETURN
+      END
+C
+C
+      SUBROUTINE EVT1MT(NEVTOP,IEVT,EVTR,EXDP,SURF,IBOUND,HNEW,
+     &  NCOL,NROW,NLAY,KSTP,KPER,BUFF,IOUT)
+C ******************************************************************
+C SAVE EVAPOTRANSPIRATION LAYER INDICES (IF NLAY>1) AND RATES
+C FOR USE IN MT3D.
+C ******************************************************************
+C Modified from McDonald & Harbaugh (1988)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DOUBLE PRECISION HNEW
+      DIMENSION IEVT(NCOL,NROW),EVTR(NCOL,NROW),EXDP(NCOL,NROW),
+     &          SURF(NCOL,NROW),IBOUND(NCOL,NROW,NLAY),
+     &          HNEW(NCOL,NROW,NLAY),BUFF(NCOL,NROW,NLAY)
+      TEXT='EVT'
+C
+C--WRITE AN IDENTIFYING HEADER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT
+C
+C--CLEAR THE BUFFER.
+      DO IL=1,NLAY
+        DO IR=1,NROW
+          DO IC=1,NCOL
+            BUFF(IC,IR,IL)=0.
+          ENDDO
+        ENDDO
+      ENDDO   
+C
+C--PROCESS EACH HORIZONTAL CELL LOCATION
+C--AND STORE ET RATES IN BUFFER (IC,IR,1)
+      DO IR=1,NROW
+        DO IC=1,NCOL
+C
+C--SET THE LAYER INDEX EQUAL TO 1
+          IL=1
+C
+C--IF OPTION 2 IS SPECIFIED THEN GET LAYER INDEX FROM IEVT ARRAY
+          IF(NEVTOP.EQ.2) IL=IEVT(IC,IR)
+C
+C--IF CELL IS EXTERNAL THEN IGNORE IT.
+          IF(IBOUND(IC,IR,IL).LE.0) GOTO 10
+C
+          C=EVTR(IC,IR)
+          S=SURF(IC,IR)
+          H=HNEW(IC,IR,IL)
+C
+C--IF AQUIFER HEAD => SURF,SET Q=MAX ET RATE
+          IF(H.GE.S) THEN
+            Q=-C
+C
+C--IF DEPTH=>EXTINCTION DEPTH, ET IS 0
+C--OTHERWISE, LINEAR RANGE: Q=-EVTR(H-EXEL)/EXDP
+          ELSE
+            X=EXDP(IC,IR)
+            D=S-H
+            IF(D.GE.X) THEN
+              Q=0
+            ELSE
+              Q=C*D/X-C
+            ENDIF
+          ENDIF
+C
+C--ADD Q TO BUFFER 1
+          BUFF(IC,IR,1)=Q
+C
+   10   ENDDO
+      ENDDO
+C
+C--RECORD THEM.
+      IF(NEVTOP.EQ.1) THEN
+        IL=1
+        WRITE(IOUT) ((IL,J=1,NCOL),I=1,NROW)
+      ELSEIF(NEVTOP.EQ.2) THEN
+        WRITE(IOUT) ((IEVT(J,I),J=1,NCOL),I=1,NROW)
+      ENDIF
+C
+      WRITE(IOUT) ((BUFF(J,I,1),J=1,NCOL),I=1,NROW)
+C
+C--RETURN
+      RETURN
+      END
+C
+C
+      SUBROUTINE GHB1MT(NBOUND,MXBND,BNDS,HNEW,
+     &  NCOL,NROW,NLAY,IBOUND,KSTP,KPER,IOUT)
+C *****************************************************************
+C SAVE HEAD DEP. BOUND. CELL LOCATIONS AND RATES FOR USE IN MT3D.
+C *****************************************************************
+C Modified from McDonald & Harbaugh (1988)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DOUBLE PRECISION HNEW
+      DIMENSION BNDS(5,MXBND),
+     &           HNEW(NCOL,NROW,NLAY),IBOUND(NCOL,NROW,NLAY)
+      TEXT='GHB'
+C
+C--WRITE AN IDENTIFYING HEADER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NBOUND
+C
+C--IF NO BOUNDARIES THEN SKIP
+      IF(NBOUND.LE.0) RETURN
+C
+C--FOR EACH GENERAL HEAD BOUND ACCUMULATE FLOW INTO AQUIFER
+      DO L=1,NBOUND
+C
+C--GET LAYER, ROW AND COLUMN OF EACH GENERAL HEAD BOUNDARY.
+        IL=BNDS(1,L)
+        IR=BNDS(2,L)
+        IC=BNDS(3,L)
+C
+C--RATE=0 IF IBOUND=<0
+        RATE=0.
+        IF(IBOUND(IC,IR,IL).GT.0) THEN
+C
+C--GET PARAMETERS FROM BOUNDARY LIST.
+          HHNEW=HNEW(IC,IR,IL)
+          HB=BNDS(4,L)
+          C=BNDS(5,L)
+C
+C--CALCULATE THE FOW RATE INTO THE CELL
+          RATE=C*(HB-HHNEW)
+        ENDIF
+C
+C--WRITE HEAD DEP. BOUND. LOCATION AND RATE
+        WRITE(IOUT) IL,IR,IC,RATE
+C
+      ENDDO
+C
+C--RETURN
+      RETURN
+      END
+C
+C
+      SUBROUTINE STR1MT(NSTREM,STRM,ISTRM,IBOUND,MXSTRM,NCOL,NROW,
+     &  NLAY,KSTP,KPER,IOUT)
+C **********************************************************************
+C SAVE STREAM LOCATIONS AND VOLUMETRIC FLOW RATES FOR USE IN MT3D.
+C **********************************************************************
+C Modified from Prudic (1989)
+C last modified: 04-11-96
+C
+      CHARACTER*16 TEXT
+      DIMENSION STRM(11,MXSTRM),ISTRM(5,MXSTRM),IBOUND(NCOL,NROW,NLAY)
+      TEXT='RIV'
+C
+C--WRITE AN IDENTIFYING HEADER
+      WRITE(IOUT) KPER,KSTP,NCOL,NROW,NLAY,TEXT,NSTREM
+C
+C--IF NO REACHES, SKIP
+      IF(NSTREM.EQ.0) RETURN
+C
+C--FOR EACH STREAM REACH GET LEAKAGE TO OR FROM IT
+      DO L=1,NSTREM
+C
+C--GET REACH LOCATION AND FLOW RATE
+        IL=ISTRM(1,L)
+        IR=ISTRM(2,L)
+        IC=ISTRM(3,L)
+        IF(IBOUND(IC,IR,IL).LE.0) THEN
+          RATE=0
+        ELSE
+          RATE=STRM(11,L)
+        ENDIF
+C
+C--WRITE STREAM REACH LOCATION AND RATE
+        WRITE(IOUT) IL,IR,IC,RATE
+C
+      ENDDO
+C
+      RETURN
+      END

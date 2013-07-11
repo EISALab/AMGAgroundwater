@@ -1,0 +1,31 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: MathSubST - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\TEMP\RSP4870.tmp" with contents
+[
+/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /Fp"Release/MathSubST.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\personal\sqyan\Reserve\newmath\MathSub\mathbase.cpp"
+"C:\personal\sqyan\Reserve\newmath\MathSub\mathfunc.cpp"
+"C:\personal\sqyan\Reserve\newmath\MathSub\mathlnag.cpp"
+]
+Creating command line "cl.exe @C:\TEMP\RSP4870.tmp" 
+Creating command line "link.exe -lib /nologo /out:"c:/Reserve/newmath/lib/MathSubST.lib"  .\Release\mathbase.obj .\Release\mathfunc.obj .\Release\mathlnag.obj .\Release\matrixio.obj .\Release\matrixln.obj "
+<h3>Output Window</h3>
+Compiling...
+mathbase.cpp
+mathfunc.cpp
+mathlnag.cpp
+Creating library...
+
+
+
+<h3>Results</h3>
+MathSubST.lib - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

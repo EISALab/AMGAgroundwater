@@ -1,0 +1,27 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: newmath - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\smyan\LOCALS~1\Temp\RSP2A8.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "_AFXDLL" /Fp"Debug/newmath.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\Project Lib\mathlib\Test\newmath.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\smyan\LOCALS~1\Temp\RSP2A8.tmp" 
+Creating command line "link.exe /nologo /subsystem:console /incremental:yes /pdb:"Debug/newmath.pdb" /debug /machine:I386 /out:"Debug/newmath.exe" /pdbtype:sept  ".\Debug\newmath.obj" ".\Debug\StdAfx.obj" "
+<h3>Output Window</h3>
+Compiling...
+newmath.cpp
+Linking...
+
+
+
+<h3>Results</h3>
+newmath.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
